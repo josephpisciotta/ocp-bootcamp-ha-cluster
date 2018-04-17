@@ -1,0 +1,9 @@
+openshift_hosted_registry_storage_kind: nfs
+openshift_hosted_registry_storage_access_modes:
+  - 'ReadWriteMany'
+openshift_hosted_registry_storage_nfs_options: "*(rw,root_squash,sync,no_wdelay)"
+openshift_hosted_registry_storage_nfs_directory: /srv/nfs
+openshift_hosted_registry_storage_volume_name: registry
+openshift_hosted_registry_storage_volume_size: 10Gi
+
+openshift_hosted_registry_selector: 'env=infra'

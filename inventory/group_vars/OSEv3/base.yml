@@ -1,0 +1,33 @@
+openshift_hosted_infra_selector: "env=infra"
+openshift_release: v3.9
+openshift_deployment_type: openshift-enterprise
+
+osm_default_node_selector: "env=app"
+
+openshift_master_identity_providers:
+  - name: 'htpasswd_auth'
+    login: 'true'
+    challenge: 'true'
+    kind: 'HTPasswdPasswordIdentityProvider'
+    filename: '/etc/origin/master/htpasswd'
+
+openshift_master_htpasswd_file: /root/htpasswd.openshift
+
+openshift_clock_enabled: true
+
+openshift_master_cluster_hostname: loadbalancer1.6160.internal
+openshift_master_cluster_public_hostname: loadbalancer.6160.example.opentlc.com
+openshift_master_cluster_method: native
+
+openshift_master_default_subdomain: apps.6160.example.opentlc.com
+
+openshift_router_selector: 'env=infra'
+
+openshift_enable_service_catalog: true
+template_service_broker_install: true
+openshift_template_service_broker_namespaces: 
+  - 'openshift'
+
+
+# disable memory check, as we are not a production environment
+openshift_disable_check: "memory_availability"
