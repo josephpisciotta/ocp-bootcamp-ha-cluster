@@ -43,3 +43,13 @@
         oc adm policy add-cluster-role-to-group cluster-admin ocp-platform
       run_once: yes
       tags: ldap
+    - name: add cluster admin role
+      command: >-
+        oc adm policy remove-cluster-role-from-group self-provisioner system:authenticated:oath
+      run_once: yes
+      tags: ldap
+    - name: add cluster admin role
+      command: >-
+        oc adm policy add-scc-to-group anyuid system:serviceaccounts:paymentapp-prod
+      run_once: yes
+      tags: ldap
