@@ -1,0 +1,94 @@
+---
+
+- include: "playbooks/deploy_cluster.yml"
+  tags: deploy_cluster
+- name: Install group sync
+  hosts: masters
+  vars:
+    projects:
+      - { name: "portalapp-dev", text: "Portal App Development" }
+      - { name: "portalapp-test", text: "Portal App Testing" }
+      - { name: "portalapp-prod", text: "Portal App Production" }
+      - { name: "paymentapp-dev", text: "Payment App Development" }
+      - { name: "paymentapp-test", text: "Payment App Testing" }
+      - { name: "paymentapp-prod", text: "Payment App Production" }
+    ldap_to_openshift_roles:
+      portalapp-dev:
+        ldap_group: portalapp
+        role: admin
+        namespace: portalapp-dev
+      portalapp-test:
+        ldap_group: portalapp
+        role: admin
+        namespace: portalapp-dev
+      paymentapp-dev:
+        ldap_group: paymenapp
+        role: admin
+        namespace: paymentapp-dev
+      paymentapp-test:
+        ldap_group: paymentapp
+        role: admin
+        namespace: paymentapp-test
+      ocpprodportal:
+        ldap_group: ocp-production
+        role: admin
+        namespace: portalapp-prod
+      ocpprodpayment:
+        ldap_group: ocp-production
+        role: admin
+        namespace: paymentapp-prod
+      imagepayprod:
+        ldap_group: system:serviceaccounts:paymentapp-prod
+        role: system:image-puller
+        namespace: paymentapp-dev
+      imagepaytest:
+        ldap_group: system:serviceaccounts:paymentapp-test
+        role: system:image-puller
+        namespace: paymentapp-dev
+      paymentapp-dev-ocp-prod-viewer:
+        ldap_group: ocp-production
+        role: registry-viewer
+        namespace: paymentapp-dev
+      paymentapp-test-ocp-prod-viewer:
+        ldap_group: ocp-production
+        role: registry-viewer
+        namespace: paymentapp-test
+  tasks:
+    - name: Check Project
+      shell: "oc get projects | grep {{ item.name }}"
+      register: projectgrep
+      with_items: "{{ projects }}"
+      run_once: yes
+      tags: ldap
+    - debug: var=projectgrep
+      tags: ldap
+    - name: Create Project
+      command: oc adm new-project {{ item.item.name }} --display-name="{{ item.item.text }}"
+      when: 'item.rc == 1'
+      with_items: "{{ projectgrep.results }}"
+      run_once: yes
+      tags: ldap
+    - copy:
+        src: files/ldap-group-sync.yml
+        dest: /etc/origin/master/ldap-group-sync.yml
+      tags: ldap
+    - copy:
+        src: files/whitelist.yml
+        dest: /etc/origin/master/whitelist.yml
+      tags: ldap
+    - name: sync ldap once
+      command: >-
+        oc adm groups sync --sync-config=/etc/origin/master/ldap-group-sync.yml --whitelist=/etc/origin/master/whitelist.yml --confirm
+      run_once: yes
+      tags: ldap
+    - name: add role to ldap group
+      command: >-
+        oc adm policy add-role-to-group {{ item.value.role }} {{ item.value.ldap_group }} -n {{ item.value.namespace }}
+      with_dict: "{{ ldap_to_openshift_roles }}"
+      run_once: yes
+      tags: ldap
+    - name: add cluster admin role
+      command: >-
+        oc adm policy add-cluster-role-to-group cluster-admin ocp-platform
+      run_once: yes
+      tags: ldap

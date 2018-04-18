@@ -10,8 +10,19 @@ openshift_master_identity_providers:
     challenge: 'true'
     kind: 'HTPasswdPasswordIdentityProvider'
     filename: '/etc/origin/master/htpasswd'
+  - name: NCL_LDAP
+    challenge: true
+    login: true
+    kind: LDAPPasswordIdentityProvider
+    attributes:
+      id: ['uid']
+    bindDN: "uid=admin,cn=users,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com"
+    bindPassword: "r3dh4t1!"
+    ca: '/etc/origin/master/ipa-ca.crt'
+    url: "ldaps://ipa.shared.example.opentlc.com:636/cn=users,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com?uid?sub?(memberOf=cn=ocp-users,cn=groups,cn=accounts,dc=shared,dc=example,dc=opentlc,dc=com)"
+    insecure: false
 
-openshift_master_htpasswd_file: /root/htpasswd.openshift
+openshift_master_htpasswd_file: "/root/htpasswd.openshift"
 
 openshift_clock_enabled: true
 
