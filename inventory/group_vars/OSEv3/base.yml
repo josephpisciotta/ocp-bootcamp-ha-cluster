@@ -3,7 +3,7 @@ openshift_release: v3.9
 openshift_deployment_type: openshift-enterprise
 
 osm_default_node_selector: "env=app"
-
+osm_project_request_message: "Contact your system administrator at lolz@gooddoge.com to request a project."
 openshift_master_identity_providers:
   - name: 'htpasswd_auth'
     login: 'true'
@@ -42,3 +42,52 @@ openshift_template_service_broker_namespaces:
 
 # disable memory check, as we are not a production environment
 openshift_disable_check: "memory_availability"
+
+projects:
+  - { name: "portalapp-dev", text: "Portal App Development" }
+  - { name: "portalapp-test", text: "Portal App Testing" }
+  - { name: "portalapp-prod", text: "Portal App Production" }
+  - { name: "paymentapp-dev", text: "Payment App Development" }
+  - { name: "paymentapp-test", text: "Payment App Testing" }
+  - { name: "paymentapp-prod", text: "Payment App Production" }
+ldap_to_openshift_roles:
+  portalapp-dev:
+    ldap_group: portalapp
+    role: admin
+    namespace: portalapp-dev
+  portalapp-test:
+    ldap_group: portalapp
+    role: admin
+    namespace: portalapp-dev
+  paymentapp-dev:
+    ldap_group: paymentapp
+    role: admin
+    namespace: paymentapp-dev
+  paymentapp-test:
+    ldap_group: paymentapp
+    role: admin
+    namespace: paymentapp-test
+  ocpprodportal:
+    ldap_group: ocp-production
+    role: admin
+    namespace: portalapp-prod
+  ocpprodpayment:
+    ldap_group: ocp-production
+    role: admin
+    namespace: paymentapp-prod
+  imagepayprod:
+    ldap_group: system:serviceaccounts:paymentapp-prod
+    role: system:image-puller
+    namespace: paymentapp-dev
+  imagepaytest:
+    ldap_group: system:serviceaccounts:paymentapp-test
+    role: system:image-puller
+    namespace: paymentapp-dev
+  paymentapp-dev-ocp-prod-viewer:
+    ldap_group: ocp-production
+    role: registry-viewer
+    namespace: paymentapp-dev
+  paymentapp-test-ocp-prod-viewer:
+    ldap_group: ocp-production
+    role: registry-viewer
+    namespace: paymentapp-test
